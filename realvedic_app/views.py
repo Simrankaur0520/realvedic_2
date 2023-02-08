@@ -68,7 +68,7 @@ def write_data(request,format=None):
     #-----------------------------------------------------------Fetching data from database tables-------------------------------------------------------------
     obj=Product_data.objects.filter(Status = "Active").values()
     prod_obj=Product_data.objects.values()
-    category_obj=categoryy.objects.values()
+    category_obj=categoryy.objects.exclude(id=57).values()
     i_and_b_obj=images_and_banners.objects.values()
     blog_obj=blogs.objects.values()
     #---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -302,9 +302,11 @@ def all_product_view(request,format=None):
 @api_view(['GET'])
 def categoryPage(request,format=None):
     category = request.GET.get('category')
+    
     products=[]
     res={}
     if category == '0' or 0:
+        category_ban=categoryy.objects.filter(category='all products').values_list('category_banner')
         prod_data=Product_data.objects.values('id','title','image','price','size')
         for i in prod_data:
       
@@ -317,15 +319,19 @@ def categoryPage(request,format=None):
             }
             products.append(prod)
         res['category']="All Products"
+        res['category_banner']=category_ban
         res['products']=products
+
         
     else :
             
         category_obj= categoryy.objects.filter(id= category).values()
         #product_obj=Product_data.objects.filter
         category_name=""
+        category_banner=""
         for i in category_obj:
             category_name=i['category']
+            category_banner=i['category_banner']
         prod_data=Product_data.objects.filter(category=category_name).values('id','title','image','price','size')
         for i in prod_data:
       
@@ -338,6 +344,7 @@ def categoryPage(request,format=None):
             }
             products.append(prod)
         res['category']=category_name
+        res['category_banner']=category_banner
         res['products']=products
        
 

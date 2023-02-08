@@ -17,24 +17,17 @@ environ.Env.read_env()
 
 @api_view(['POST'])
 def start_payment(request):
-    # request.data is coming from frontend
     amount = request.data['amount']
     name = request.data['name']
 
-    # setup razorpay client this is the client to whome user is paying money that's you
     client = razorpay.Client(auth=('rzp_test_gHJS0k5aSWUMQc', '8hPVwKRnj4DZ7SB1wyW1miaf'))
+   
+    #cart_to_order_shift(token)
 
-    # create razorpay order
-    # the amount will come in 'paise' that means if we pass 50 amount will become
-    # 0.5 rupees that means 50 paise so we have to convert it in rupees. So, we will 
-    # mumtiply it by 100 so it will be 50 rupees.
-    payment = client.order.create({"amount": int(amount) * 100, 
+    payment = client.order.create({"amount": eval(amount) * 100, 
                                    "currency": "INR", 
                                    "payment_capture": "1"})
 
-    # we are saving an order with isPaid=False because we've just initialized the order
-    # we haven't received the money we will handle the payment succes in next 
-    # function
     order = PaymentOrder.objects.create(order_product=name, 
                                  order_amount=amount, 
                                  order_payment_id=payment['id'])
@@ -51,15 +44,20 @@ def start_payment(request):
 
     data = {
         "payment": payment,
-        "order": serializer.data
+        "order": serializer.data,
+      
     }
     return Response(data)
+
+
 
 
 @api_view(['POST'])
 def handle_payment_success(request):
     # request.data is coming from frontend
-    res = json.loads(request.data["response"])
+    # print(type(request.data["response"]))
+    res = eval(request.data["response"])
+
 
     """res will be:
     {'razorpay_payment_id': 'pay_G3NivgSZLx7I9e', 
@@ -68,10 +66,12 @@ def handle_payment_success(request):
     this will come from frontend which we will use to validate and confirm the payment
     """
 
-    ord_id = ""
+    ord_id =""
     raz_pay_id = ""
     raz_signature = ""
-
+    amount=request.data['amount']
+    token=request.data['token']
+    
     # res.keys() will give us list of keys in res
     for key in res.keys():
         if key == 'razorpay_order_id':
@@ -80,7 +80,10 @@ def handle_payment_success(request):
             raz_pay_id = res[key]
         elif key == 'razorpay_signature':
             raz_signature = res[key]
+        elif key == res['amount']:
+            amount = res[key]
 
+       
     # get order by payment_id which we've created earlier with isPaid=False
     order = PaymentOrder.objects.get(order_payment_id=ord_id)
 
@@ -91,22 +94,25 @@ def handle_payment_success(request):
         'razorpay_signature': raz_signature
     }
 
-    client = razorpay.Client(auth=(env('PUBLIC_KEY'), env('SECRET_KEY')))
+    client = razorpay.Client(auth=('rzp_test_gHJS0k5aSWUMQc', '8hPVwKRnj4DZ7SB1wyW1miaf'))
 
     # checking if the transaction is valid or not by passing above data dictionary in 
     # razorpay client if it is "valid" then check will return None
     check = client.utility.verify_payment_signature(data)
 
-    if check is not None:
+    if not check:
         print("Redirect to error url or error page")
         return Response({'error': 'Something went wrong'})
 
     # if payment is successful that means check is None then we will turn isPaid=True
     order.isPaid = True
     order.save()
+    #cart_to_order_shift(token,amount,ord_id)
 
     res_data = {
         'message': 'payment successfully received!'
     }
+ 
+  
 
     return Response(res_data)

@@ -34,6 +34,7 @@ class categoryy(models.Model):
     category=models.TextField()
     category_colour=models.TextField()
     category_image=models.ImageField(upload_to='images/')
+    category_banner=models.ImageField(null=True,upload_to='images/')
 
 class order_data(models.Model):
     order_id=models.TextField()
@@ -96,6 +97,15 @@ class PaymentOrder(models.Model):
 
     def __str__(self):
         return self.order_product
+
+
+class doctor_info(models.Model):
+      title=models.TextField(blank=True) 
+      education=models.TextField(blank=True)
+      experience=models.TextField(blank=True)
+      speciality=models.TextField(blank=True)
+      available=models.TextField(blank=True)
+      image=models.ImageField(upload_to='images/')
 
 
 

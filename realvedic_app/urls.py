@@ -10,6 +10,7 @@ import realvedic_app.auth as auth
 import realvedic_app.cart as cart
 import realvedic_app.user_account as usr
 import realvedic_app.paymentgateway as pay
+import realvedic_app.doctors as doc
 '''import realvedic_app.admin_views as admin_views
 import realvedic_app.payments as pay
 import realvedic_app.order_status as od'''
@@ -43,7 +44,10 @@ urlpatterns = [
     path('start_payment',pay.start_payment,name='start_payment'),
     path('handle_payment_success',pay.handle_payment_success,name='handle_payment_success'),
 
-     
+
+
+     path('doctor_detail_view',doc.doctor_detail_view,name='doctor_detail_view'),
+
     
     
 
