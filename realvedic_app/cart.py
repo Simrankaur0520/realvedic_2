@@ -146,6 +146,7 @@ def UserCartView(request,format=None):
             prod_dict={
                 'product_id':i['product_id'],
                 'name':j['title'],
+                'size':i['size'],
                 'unit_price':i['price_per_unit'],
                 'price':eval(i['price_per_unit'])*eval(i['quantity']),
                 'quantity':i['quantity'],
@@ -213,6 +214,7 @@ def checkout(request,format=None):
                 prod_dict={
                     'product_id':i['product_id'],
                     'name':j['title'],
+                    'size':i['size'],
                     'unit_price':i['price_per_unit'],
                     'price':eval(i['price_per_unit'])*eval(i['quantity']),
                     'quantity':i['quantity'],
@@ -272,34 +274,37 @@ def CartUpdate(request,format=None):
     token=request.data['token']
     update_type=request.data['update_type']
     prod_id=request.data['prod_id']
-  
+    size=request.data['size']
+    price=request.data['price']
+
+
     #----------------------data fetching-----------------------
-    try:
-        user = user_data.objects.get(token = token)
-        items = user_cart.objects.filter(user_id = user.id,product_id=prod_id).values().last()
+    
+    user = user_data.objects.get(token = token)
+    items = user_cart.objects.filter(user_id = user.id,product_id=prod_id,size=size,price_per_unit=price).values().last()
         #item_to_be_updated=items.filter(product_id=prod_id).values('quantity')
-        try:
+        
    
-            if update_type=='+':
+    if update_type=='+':
                 quantity=int(items['quantity'])+1
-                user_cart.objects.filter(user_id = user.id,product_id=prod_id).update(quantity=quantity)
+                user_cart.objects.filter(user_id = user.id,product_id=prod_id,size=size,price_per_unit=price).update(quantity=quantity)
                 res={
                     'status':True,
                     'message':"quantity updated successfully"
                 }
-            elif update_type=="-":
+    elif update_type=="-":
                 quantity=int(items['quantity'])-1
-                user_cart.objects.filter(user_id = user.id,product_id=prod_id).update(quantity=quantity)
+                user_cart.objects.filter(user_id = user.id,product_id=prod_id,size=size,price_per_unit=price).update(quantity=quantity)
                 res={
                     'status':True,
                     'message':"quantity updated successfully"
                 }
-            else:
+    else:
                 res={
                     'status':False,
                     'message':"Something went wrong"
                 }
-        except:
+    '''except:
             res={
                     'status':False,
                     'message':"Something went wrong"
@@ -308,7 +313,7 @@ def CartUpdate(request,format=None):
             res={
                     'status':False,
                     'message':"Something went wrong"
-                }
+                }'''
 
             
     return Response(res)
@@ -324,11 +329,13 @@ def CartUpdate(request,format=None):
 def CartitemDelete(request,format=None):
     token=request.data['token']
     prod_id=request.data['prod_id']
+    size=request.data['size']
+    price=request.data['price']
   
     #----------------------data fetching-----------------------
     try:
         user = user_data.objects.get(token = token)
-        items = user_cart.objects.get(user_id = user.id,product_id=prod_id)
+        items = user_cart.objects.get(user_id = user.id,product_id=prod_id,size=size,price_per_unit=price)
         items.delete()
         res={
             'status':True,
@@ -342,20 +349,3 @@ def CartitemDelete(request,format=None):
     return Response(res)
     
 
-'''   obj = user_cart.objects.filter(user_id = user.id,
-                                        product_id = product_id,
-                                        size = size,
-                                        price_per_unit=price).values().last()
-                quantity = int(obj['quantity'])+1
-                user_cart.objects.filter(user_id = user.id,
-                                        product_id = product_id,
-                                        size = size,
-                                        price_per_unit=price,
-                                       ).update(quantity = quantity)'''
-
-  
-'''if update_type=='+':
-        obj=user_cart.objects.filter(user_id = user.id).values()
-        return Response(items)
-    else:
-        return Response("nothing ")'''

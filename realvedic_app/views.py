@@ -196,9 +196,10 @@ def write_data(request,format=None):
     return Response(res)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def single_product_view(request,format=None):
-    obj=Product_data.objects.filter(id=10).values()
+    prod_id=request.data["prod_id"]
+    obj=Product_data.objects.filter(id=prod_id).values()
     #-------------------------------------------------------Dictionaries and list initialisation--------------------------------------------------
     #----------------------------------------------------------Mock description--------------------------------------------------------------------
     desc=str("A ready dosa mix without going through the hassle of soaking, grinding, and preparing the batter. Just add water and salt, rest for few minutes, and start making tasty and healthy dosas. We have combined 80 sprouted green gram with nutritious moringa leaves and spices for a power-packed quick meal any time of the day.")
@@ -214,7 +215,7 @@ def single_product_view(request,format=None):
             weight_price={
                 'weight':weight[j],
                 'price':price[j],
-                'Offer_price':int(price[j])+5
+                'Offer_price':int(price[j])-5
             }
             pack_size.append(weight_price)
         prod_details={
@@ -222,7 +223,7 @@ def single_product_view(request,format=None):
             "title":i["title"],
             'description':desc,
             "original_price":i["price"].split("|")[0],
-            "offer_price":int(i["price"].split("|")[0])+5,
+            "offer_price":int(i["price"].split("|")[0])-5,
             'single_image':i["image"],
             'images':["",""],
             'pack_size':pack_size}
