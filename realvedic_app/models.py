@@ -38,10 +38,13 @@ class categoryy(models.Model):
 
 class order_data(models.Model):
     order_id=models.TextField()
-    order_date = models.TextField()
-    Customer_id = models.TextField()
-    Product_id = models.TextField()
-    Total_amount = models.TextField()
+    user_id = models.TextField(null=True,blank=True)
+    placed_at = models.DateTimeField(auto_now_add=True)
+    Product_id = models.TextField(null=True,blank=True)
+    size = models.TextField(null=True,blank=True)
+    price_per_unit=models.TextField(null=True,blank=True)
+    quantity = models.TextField(null=True,blank=True)
+    Total_amount = models.TextField(null=True,blank=True)
 
 class images_and_banners(models.Model):
     title=models.TextField()
@@ -94,6 +97,7 @@ class PaymentOrder(models.Model):
     order_payment_id = models.CharField(max_length=100)
     isPaid = models.BooleanField(default=False)
     order_date = models.DateTimeField(auto_now=True)
+    token=models.TextField(null=True)
 
     def __str__(self):
         return self.order_product

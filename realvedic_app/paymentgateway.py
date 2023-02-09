@@ -5,7 +5,7 @@ import razorpay
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from realvedic_app.models import PaymentOrder
+from realvedic_app.models import PaymentOrder,user_data,order_data,user_cart
 from realvedic_app.serializers import OrderSerializer
 
 env = environ.Env()
@@ -19,6 +19,7 @@ environ.Env.read_env()
 def start_payment(request):
     amount = request.data['amount']
     name = request.data['name']
+    token = request.data['token']
 
     client = razorpay.Client(auth=('rzp_test_gHJS0k5aSWUMQc', '8hPVwKRnj4DZ7SB1wyW1miaf'))
    
@@ -30,7 +31,8 @@ def start_payment(request):
 
     order = PaymentOrder.objects.create(order_product=name, 
                                  order_amount=amount, 
-                                 order_payment_id=payment['id'])
+                                 order_payment_id=payment['id'],
+                                 token=token)
 
     serializer = OrderSerializer(order)
 
@@ -41,10 +43,12 @@ def start_payment(request):
     'order_amount': '**product amount from frontend**', 
     'order_payment_id': 'order_G3NhfSWWh5UfjQ', # it will be unique everytime
     'isPaid': False}"""
-
+    ord=PaymentOrder.objects.values()
     data = {
         "payment": payment,
         "order": serializer.data,
+        "obj":ord
+        
       
     }
     return Response(data)
@@ -57,6 +61,11 @@ def handle_payment_success(request):
     # request.data is coming from frontend
     # print(type(request.data["response"]))
     res = eval(request.data["response"])
+    token=request.data['token']
+    final_price=request.data['amount']
+    items=eval(request.data['items'])
+    print(type(items))
+  
 
 
     """res will be:
@@ -69,8 +78,6 @@ def handle_payment_success(request):
     ord_id =""
     raz_pay_id = ""
     raz_signature = ""
-    amount=request.data['amount']
-    token=request.data['token']
     
     # res.keys() will give us list of keys in res
     for key in res.keys():
@@ -80,9 +87,7 @@ def handle_payment_success(request):
             raz_pay_id = res[key]
         elif key == 'razorpay_signature':
             raz_signature = res[key]
-        elif key == res['amount']:
-            amount = res[key]
-
+       
        
     # get order by payment_id which we've created earlier with isPaid=False
     order = PaymentOrder.objects.get(order_payment_id=ord_id)
@@ -107,12 +112,82 @@ def handle_payment_success(request):
     # if payment is successful that means check is None then we will turn isPaid=True
     order.isPaid = True
     order.save()
+    res=cart_to_order(token,items,ord_id)
+    print(type(res))
     #cart_to_order_shift(token,amount,ord_id)
+    
 
     res_data = {
-        'message': 'payment successfully received!'
+        'message': 'payment successfully received!',
+        
+        'status':""
+        
     }
  
   
 
     return Response(res_data)
+
+
+def cart_to_order(token,items,ord_id):
+   
+    token=token
+    items=items
+    ord_id=ord_id
+    res=""
+    usr=user_data.objects.get(token=token)
+    ord=PaymentOrder.objects.filter(token=token).values()
+    for i in range(len(ord)):
+        if ord[i]['isPaid']==True:
+                for i in range(len(items)):
+                    data=order_data(order_id=ord_id, 
+                                        user_id=usr.id, 
+                                        Product_id=items[i]['product_id'],
+                                        size=items[i]['size'],
+                                        price_per_unit=items[i]['unit_price'],
+                                        quantity=items[i]['quantity'])
+                    data.save()
+                  
+                    cart=user_cart.objects.filter(user_id=usr.id,
+                                                product_id=items[i]['product_id'],
+                                        size=items[i]['size'],
+                                        price_per_unit=items[i]['unit_price'],
+                                        quantity=items[i]['quantity']).all()
+                    cart.delete()
+                                                    
+                res='added successfully'
+        else:
+            res='something went wrong'
+        print(res)
+
+''' usr=user_data.objects.get(token=token)
+    items=items
+    orde_id=ord_id
+    print("return_type",type(items))'''
+'''order_id=order_id
+    if ord.isPaid==True:
+        for i in items:
+            order_data.objects.create(order_id=order_id, 
+                                 user_id=usr.id, 
+                                 Product_id=items[i]['product_id'],
+                                 size=items[i]['size'],
+                                 price_per_unit=items[i]['price_per_unit'],
+                                 quantity=items[i]['quantity'])
+        orde=order_data.objects.values()
+        res={'added successfully'}
+
+    else:
+        res={'something went wrong'}'''
+ 
+@api_view(['POST'])
+def order_view(request,format=None):
+    token=request.data['token']
+    ord=order_data.objects.values()
+ 
+  
+    
+    ordr=PaymentOrder.objects.all()
+    
+   
+ 
+    return Response(ord)

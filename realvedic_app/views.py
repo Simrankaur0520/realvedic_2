@@ -25,7 +25,7 @@ from rest_framework.parsers import MultiPartParser,FormParser
 from rest_framework.response import Response
 
 #----------------------------models---------------------------------------------------
-from realvedic_app.models import Product_data,categoryy,images_and_banners,blogs
+from realvedic_app.models import Product_data,categoryy,images_and_banners,blogs,user_cart
 #from apiApp.models import user_whishlist,user_data
 #from apiApp.models import metal_price,diamond_pricing
 
@@ -71,6 +71,7 @@ def write_data(request,format=None):
     category_obj=categoryy.objects.exclude(id=57).values()
     i_and_b_obj=images_and_banners.objects.values()
     blog_obj=blogs.objects.values()
+    items=user_cart.objects.values()
     #---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     #--------------------------------------------------------------list creation and initiation----------------------------------------------------------------
@@ -106,10 +107,11 @@ def write_data(request,format=None):
     #-----------------------------------------------------passing values for Top selling products----------------------------------------------------- 
     for i in obj:
         top_seller_products={
+            'id':i['id'],
             'image':i["image"],
             "title":i["title"],
-            "weight":i["size"].split("|")[0],
-            "price":i["price"].split("|")[0]
+            "weight":i["size"].split("|"),
+            "price":i["price"].split("|")
         }
     
         top_seller_products_list.append(top_seller_products)
