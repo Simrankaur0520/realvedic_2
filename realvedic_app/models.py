@@ -35,16 +35,38 @@ class categoryy(models.Model):
     category_colour=models.TextField()
     category_image=models.ImageField(upload_to='images/')
     category_banner=models.ImageField(null=True,upload_to='images/')
+#-----------------------------------------------------------------------------------------------
+order_status_choices=(
+    ('placed','PLACED'),
+    ("Ready to dispatch",'READY TO DISPATCH'),
+    ('dispatched','DISPATCHED',),
+    ('on the way','On the way'),
+    ('delivered','DELIVERED'),
+    ('CANCELLED','cancelled'),
+    ('RETURNED','returned'),
 
-class order_data(models.Model):
+)
+'''class order_data(models.Model):
     order_id=models.TextField()
     user_id = models.TextField(null=True,blank=True)
-    placed_at = models.DateTimeField(auto_now_add=True)
+    placed_at = models.DateField(auto_now_add=True,blank=True,null=True)
     Product_id = models.TextField(null=True,blank=True)
     size = models.TextField(null=True,blank=True)
     price_per_unit=models.TextField(null=True,blank=True)
     quantity = models.TextField(null=True,blank=True)
     Total_amount = models.TextField(null=True,blank=True)
+    status=models.CharField(max_length=50,choices = order_status_choices,default='Placed')
+    image=models.TextField(blank=True,null=True)'''
+
+class Order_data(models.Model):
+    order_id=models.TextField()
+    user_id = models.TextField(null=True,blank=True)
+    placed_at = models.DateField(auto_now_add=True,blank=True,null=True)
+    product_details=models.TextField(null=True,blank=True)
+    Total_amount = models.TextField(null=True,blank=True)
+    status=models.CharField(max_length=50,choices = order_status_choices,default='Placed')
+
+
 
 class images_and_banners(models.Model):
     title=models.TextField()
@@ -64,6 +86,7 @@ class user_cart(models.Model):
     size = models.TextField()
     price_per_unit=models.TextField(blank=True)
     quantity = models.TextField(blank=True)
+    image=models.TextField(blank=True,null=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 class user_data(models.Model):
@@ -110,6 +133,8 @@ class doctor_info(models.Model):
       speciality=models.TextField(blank=True)
       available=models.TextField(blank=True)
       image=models.ImageField(upload_to='images/')
+
+
 
 
 

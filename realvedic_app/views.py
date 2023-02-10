@@ -25,7 +25,7 @@ from rest_framework.parsers import MultiPartParser,FormParser
 from rest_framework.response import Response
 
 #----------------------------models---------------------------------------------------
-from realvedic_app.models import Product_data,categoryy,images_and_banners,blogs,user_cart
+from realvedic_app.models import Product_data,categoryy,images_and_banners,blogs,user_cart,user_data
 #from apiApp.models import user_whishlist,user_data
 #from apiApp.models import metal_price,diamond_pricing
 
@@ -304,14 +304,21 @@ def all_product_view(request,format=None):
 @api_view(['GET'])
 def categoryPage(request,format=None):
     category = request.GET.get('category')
-    
+    token = request.GET.get('token')
+    try:
+        user = user_data.objects.get(token = token)
+        cart_product_ids = user_cart.objects.filter(user_id = user.id).values_list('product_id',flat=True)
+    except:
+        cart_product_ids = []
+   
     products=[]
     res={}
+
     if category == '0' or 0:
         category_ban=categoryy.objects.filter(category='all products').values_list('category_banner')
         prod_data=Product_data.objects.values('id','title','image','price','size')
         for i in prod_data:
-      
+            
             prod={
                 'id':i['id'],
                 "title":i["title"],
@@ -319,6 +326,10 @@ def categoryPage(request,format=None):
                 "weight":i["size"].split("|"),
                 "price":i["price"].split("|")
             }
+            if str(i['id']) in cart_product_ids:
+                prod['cart_status'] = True
+            else:
+                prod['cart_status'] = False
             products.append(prod)
         res['category']="All Products"
         res['category_banner']=category_ban
@@ -344,6 +355,10 @@ def categoryPage(request,format=None):
                 "weight":i["size"].split("|"),
                 "price":i["price"].split("|")
             }
+            if i['id'] in cart_product_ids:
+                prod['cart_status'] = True
+            else:
+                prod['cart_status'] = False
             products.append(prod)
         res['category']=category_name
         res['category_banner']=category_banner

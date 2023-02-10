@@ -11,6 +11,7 @@ import realvedic_app.cart as cart
 import realvedic_app.user_account as usr
 import realvedic_app.paymentgateway as pay
 import realvedic_app.doctors as doc
+import realvedic_app.CartToOrder as cto
 import realvedic_app.admin_pages.adminproductsInfo as ad
 '''import realvedic_app.admin_views as admin_views
 import realvedic_app.payments as pay
@@ -44,7 +45,7 @@ urlpatterns = [
 
     path('start_payment',pay.start_payment,name='start_payment'),
     path('handle_payment_success',pay.handle_payment_success,name='handle_payment_success'),
-    path('order_view',pay.order_view,name='order_view'),
+    #path('corder_view',pay.corder_view,name='corder_view'),
 
 
 
@@ -53,7 +54,17 @@ urlpatterns = [
 
     #-----------------------------Admin pages ------------------------------------------------
 
-    path('adminProductView',ad.adminProductView,name='adminProductView')
+    path('adminProductView',ad.adminProductView,name='adminProductView'),
+
+
+
+    #----------------------order pages--------------------------------
+
+    path('order_view',cto.order_view,name='order_view'),
+    path('single_order_view',cto.single_order_view,name='single_order_view'),
+
+
+
     
     
 

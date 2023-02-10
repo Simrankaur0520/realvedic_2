@@ -48,7 +48,7 @@ def add_to_cart(request,fromat=None):
         #----------------Checking for Product id in produt data
 
         try:
-            Product_data.objects.get(id=product_id)
+            pro=Product_data.objects.get(id=product_id)
             print("1st try encounetred")
             try:
                 user = user_data.objects.get(token = token)
@@ -71,6 +71,7 @@ def add_to_cart(request,fromat=None):
                                     size = size,
                                     price_per_unit=price,
                                     quantity = '1',
+                                    image=pro.image
               
                                 )
                 data.save()
@@ -276,34 +277,55 @@ def CartUpdate(request,format=None):
     prod_id=request.data['prod_id']
     size=request.data['size']
     price=request.data['price']
+    res={}
 
 
     #----------------------data fetching-----------------------
     
     user = user_data.objects.get(token = token)
-    items = user_cart.objects.filter(user_id = user.id,product_id=prod_id,size=size,price_per_unit=price).values().last()
+    items = user_cart.objects.filter(user_id = user.id,product_id=prod_id,size=size,price_per_unit=price).values().values()
         #item_to_be_updated=items.filter(product_id=prod_id).values('quantity')
-        
+    for i in items :
+        quantity=int(i['quantity'])
    
-    if update_type=='+':
-                quantity=int(items['quantity'])+1
-                user_cart.objects.filter(user_id = user.id,product_id=prod_id,size=size,price_per_unit=price).update(quantity=quantity)
-                res={
-                    'status':True,
-                    'message':"quantity updated successfully"
-                }
-    elif update_type=="-":
-                quantity=int(items['quantity'])-1
-                user_cart.objects.filter(user_id = user.id,product_id=prod_id,size=size,price_per_unit=price).update(quantity=quantity)
-                res={
-                    'status':True,
-                    'message':"quantity updated successfully"
-                }
-    else:
-                res={
-                    'status':False,
-                    'message':"Something went wrong"
-                }
+        if update_type=='+':
+                    quantity=quantity+1
+                    user_cart.objects.filter(user_id = user.id,product_id=prod_id,size=size,price_per_unit=price).update(quantity=quantity)
+                    res={
+                        'status':True,
+                        'message':"quantity updated successfully",
+                        'items' :user_cart.objects.filter(user_id = user.id).values()
+
+                    }
+        elif update_type=="-":
+            
+                    quantity=quantity-1
+                    if quantity<=0:
+
+                        dell=user_cart.objects.get(user_id = user.id,product_id=prod_id,size=size,price_per_unit=price)
+                        dell.delete()
+                        res={
+                        'status':True,
+                        'message':"Product Deleted from cart",
+                        'items' :user_cart.objects.filter(user_id = user.id).values()
+
+                    }
+                    else:
+                         user_cart.objects.filter(user_id = user.id,product_id=prod_id,size=size,price_per_unit=price).update(quantity=quantity)
+
+                    res={
+                        'status':True,
+                        'message':"quantity updated successfully",
+                        'items' :user_cart.objects.filter(user_id = user.id).values()
+
+                    }
+        else:
+                    res={
+                        'status':False,
+                        'message':"Something went wrong",
+                        'items' :user_cart.objects.filter(user_id = user.id).values()
+
+                    }
     '''except:
             res={
                     'status':False,

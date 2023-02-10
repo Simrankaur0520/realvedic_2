@@ -5,7 +5,7 @@ import razorpay
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from realvedic_app.models import PaymentOrder,user_data,order_data,user_cart
+from realvedic_app.models import PaymentOrder,user_data,user_cart,Order_data,Product_data
 from realvedic_app.serializers import OrderSerializer
 
 env = environ.Env()
@@ -112,7 +112,7 @@ def handle_payment_success(request):
     # if payment is successful that means check is None then we will turn isPaid=True
     order.isPaid = True
     order.save()
-    res=cart_to_order(token,items,ord_id)
+    res=cart_to_order(token,items,ord_id,final_price)
     print(type(res))
     #cart_to_order_shift(token,amount,ord_id)
     
@@ -120,7 +120,7 @@ def handle_payment_success(request):
     res_data = {
         'message': 'payment successfully received!',
         
-        'status':""
+        'status':res
         
     }
  
@@ -129,37 +129,56 @@ def handle_payment_success(request):
     return Response(res_data)
 
 
-def cart_to_order(token,items,ord_id):
+def cart_to_order(token,items,ord_id,final_price):
    
     token=token
     items=items
     ord_id=ord_id
     res=""
+    order_details=[]
+    amount=final_price
+    
     usr=user_data.objects.get(token=token)
-    ord=PaymentOrder.objects.filter(token=token).values()
+    ord=PaymentOrder.objects.filter(token=token,order_payment_id=ord_id).values()
+    prod=Product_data.objects.values()
+  
     for i in range(len(ord)):
         if ord[i]['isPaid']==True:
                 for i in range(len(items)):
-                    data=order_data(order_id=ord_id, 
-                                        user_id=usr.id, 
-                                        Product_id=items[i]['product_id'],
-                                        size=items[i]['size'],
-                                        price_per_unit=items[i]['unit_price'],
-                                        quantity=items[i]['quantity'])
-                    data.save()
-                  
+                    prod_dict={
+                        'Product_id':items[i]['product_id'],
+                        'product_name':list(prod.filter(id=items[i]['product_id']).values_list('title',flat=True))[0],
+                        'size':items[i]['size'],
+                        'price_per_unit':items[i]['unit_price'],
+                        'quantity':items[i]['quantity'],
+                        'image':items[i]['image']
+
+                    }
+                    order_details.append(prod_dict)
                     cart=user_cart.objects.filter(user_id=usr.id,
                                                 product_id=items[i]['product_id'],
                                         size=items[i]['size'],
                                         price_per_unit=items[i]['unit_price'],
                                         quantity=items[i]['quantity']).all()
                     cart.delete()
-                                                    
-                res='added successfully'
+                    res='added successfully'
         else:
             res='something went wrong'
-        print(res)
+       
 
+    data=Order_data(order_id=ord_id, 
+                    user_id=usr.id,
+                    product_details=list(order_details),
+                    Total_amount=amount,
+                    status='Placed'
+    )
+
+    data.save()
+    return(res)
+                  
+                    
+                                                    
+   
 ''' usr=user_data.objects.get(token=token)
     items=items
     orde_id=ord_id
@@ -179,15 +198,19 @@ def cart_to_order(token,items,ord_id):
     else:
         res={'something went wrong'}'''
  
-@api_view(['POST'])
-def order_view(request,format=None):
-    token=request.data['token']
-    ord=order_data.objects.values()
+'''@api_view(['GET'])
+def corder_view(request,format=None):
  
+    ord=Order_data.objects.all()
+    ord.delete()
+    
+
+
+    
   
     
-    ordr=PaymentOrder.objects.all()
+    ordr=PaymentOrder.objects.values()
     
    
  
-    return Response(ord)
+    return Response(ord)'''
