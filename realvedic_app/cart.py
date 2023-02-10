@@ -277,7 +277,7 @@ def CartUpdate(request,format=None):
     prod_id=request.data['prod_id']
     size=request.data['size']
     price=request.data['price']
-    res={}
+
 
 
     #----------------------data fetching-----------------------
@@ -301,9 +301,11 @@ def CartUpdate(request,format=None):
             
                     quantity=quantity-1
                     if quantity<=0:
-
+                        
                         dell=user_cart.objects.get(user_id = user.id,product_id=prod_id,size=size,price_per_unit=price)
+                        
                         dell.delete()
+                        
                         res={
                         'status':True,
                         'message':"Product Deleted from cart",
@@ -311,14 +313,14 @@ def CartUpdate(request,format=None):
 
                     }
                     else:
-                         user_cart.objects.filter(user_id = user.id,product_id=prod_id,size=size,price_per_unit=price).update(quantity=quantity)
+                        user_cart.objects.filter(user_id = user.id,product_id=prod_id,size=size,price_per_unit=price).update(quantity=quantity)
 
-                    res={
-                        'status':True,
-                        'message':"quantity updated successfully",
-                        'items' :user_cart.objects.filter(user_id = user.id).values()
+                        res={
+                            'status':True,
+                            'message':"quantity updated successfully",
+                            'items' :user_cart.objects.filter(user_id = user.id).values()
 
-                    }
+                        }
         else:
                     res={
                         'status':False,
