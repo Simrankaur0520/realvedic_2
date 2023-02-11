@@ -38,7 +38,7 @@ class categoryy(models.Model):
 #-----------------------------------------------------------------------------------------------
 order_status_choices=(
     ('placed','PLACED'),
-    ("Ready to dispatch",'READY TO DISPATCH'),
+    ("Processed",'processed'),
     ('dispatched','DISPATCHED',),
     ('on the way','On the way'),
     ('delivered','DELIVERED'),

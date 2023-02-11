@@ -171,8 +171,8 @@ def UserCartView(request,format=None):
         res = {
             'status':True,
             'message':'Cart generated successfully',
-            'products':[],
-            'checkout_data': []
+            'cartItems':[],
+            'cart_total': []
           }
         return Response(res)
     else :
@@ -293,7 +293,7 @@ def CartUpdate(request,format=None):
                     user_cart.objects.filter(user_id = user.id,product_id=prod_id,size=size,price_per_unit=price).update(quantity=quantity)
                     res={
                         'status':True,
-                        'message':"quantity updated successfully",
+                        'message':"Product quantity increased successfully",
                         'items' :user_cart.objects.filter(user_id = user.id).values()
 
                     }
@@ -317,7 +317,7 @@ def CartUpdate(request,format=None):
 
                         res={
                             'status':True,
-                            'message':"quantity updated successfully",
+                            'message':"Product quantity decreased successfully",
                             'items' :user_cart.objects.filter(user_id = user.id).values()
 
                         }

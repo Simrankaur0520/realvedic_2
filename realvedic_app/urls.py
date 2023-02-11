@@ -23,6 +23,8 @@ urlpatterns = [
     path("single_product_view",views.single_product_view,name="single_product_view"),
     path("categoryPage",views.categoryPage,name="categoryPage"),
     path("all_product_view",views.all_product_view,name="all_product_view"),
+    path("NavbarCategoryView",views.NavbarCategoryView,name="NavbarCategoryView"),
+
     #--------login and signup
     path('signUp',auth.signUp,name='signUp'),
     path('login',auth.login,name='login'),

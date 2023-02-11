@@ -37,6 +37,12 @@ import simplejson as json
 #Putting data into database
 @api_view(['GET'])
 def write_data(request,format=None):
+    token = request.GET.get('token')
+    try:
+        user = user_data.objects.get(token = token)
+        cart_product_ids = user_cart.objects.filter(user_id = user.id).values_list('product_id',flat=True)
+    except:
+        cart_product_ids = []
     best_offers={
     "soup": {
       "title": "Rasam & Soups",
@@ -113,6 +119,10 @@ def write_data(request,format=None):
             "weight":i["size"].split("|"),
             "price":i["price"].split("|")
         }
+        if str(i['id']) in cart_product_ids:
+            top_seller_products['cart_status'] = True
+        else:
+            top_seller_products['cart_status'] = False
     
         top_seller_products_list.append(top_seller_products)
     food=top_seller_products
@@ -206,7 +216,6 @@ def single_product_view(request,format=None):
     #----------------------------------------------------------Mock description--------------------------------------------------------------------
     desc=str("A ready dosa mix without going through the hassle of soaking, grinding, and preparing the batter. Just add water and salt, rest for few minutes, and start making tasty and healthy dosas. We have combined 80 sprouted green gram with nutritious moringa leaves and spices for a power-packed quick meal any time of the day.")
     res={}
-   
     benefits={}
     pack_size=[]
     #------------------------------------------------------assigning product_details to the response----------------------------------------------
@@ -220,14 +229,18 @@ def single_product_view(request,format=None):
                 'Offer_price':int(price[j])-5
             }
             pack_size.append(weight_price)
+        
+        img=((i["image"]+',')*4)
+     
         prod_details={
+            
             'id':i["id"],
             "title":i["title"],
             'description':desc,
             "original_price":i["price"].split("|")[0],
             "offer_price":int(i["price"].split("|")[0])-5,
             'single_image':i["image"],
-            'images':["",""],
+            'images':img.split(','),
             'pack_size':pack_size}
             
         benefits={
@@ -355,7 +368,7 @@ def categoryPage(request,format=None):
                 "weight":i["size"].split("|"),
                 "price":i["price"].split("|")
             }
-            if i['id'] in cart_product_ids:
+            if str(i['id']) in cart_product_ids:
                 prod['cart_status'] = True
             else:
                 prod['cart_status'] = False
@@ -367,9 +380,30 @@ def categoryPage(request,format=None):
 
     return Response(res)
 
+@api_view(['GET'])
+def NavbarCategoryView(request,format=None):
+    category_list_res=[]
+    category_ban=categoryy.objects.values()
+    prod_data=Product_data.objects.values()
+    res={}
 
-#----------------------------------------------------------user cart view-------------------------------------------------------
+    for i in category_ban:
+        if i['category']=='all products':
+            cat_details={
+            'category':'All Products',
+            'id':0,
+            'items':prod_data.values('id','title','image')
+            }
+            category_list_res.append(cat_details)
+        else:
+            cat_details={
+                'category':i['category'],
+                'id':i['id'],
+                'items':prod_data.filter(category=i['category']).values('id','title','image')
+            }
+            category_list_res.append(cat_details)
 
+    return Response(category_list_res)
 
 #----------------------------------------------------------data input for all databses commented down in this function-----------------------------
 @api_view(['GET'])
