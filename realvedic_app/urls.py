@@ -13,6 +13,7 @@ import realvedic_app.paymentgateway as pay
 import realvedic_app.doctors as doc
 import realvedic_app.CartToOrder as cto
 import realvedic_app.admin_pages.adminproductsInfo as ad
+import realvedic_app.extra_functions as ex
 '''import realvedic_app.admin_views as admin_views
 import realvedic_app.payments as pay
 import realvedic_app.order_status as od'''
@@ -22,7 +23,7 @@ urlpatterns = [
     path("write_data",views.write_data,name="write_data"),
     path("single_product_view",views.single_product_view,name="single_product_view"),
     path("categoryPage",views.categoryPage,name="categoryPage"),
-    path("all_product_view",views.all_product_view,name="all_product_view"),
+    #path("all_product_view",views.all_product_view,name="all_product_view"),
     path("NavbarCategoryView",views.NavbarCategoryView,name="NavbarCategoryView"),
 
     #--------login and signup
@@ -64,6 +65,11 @@ urlpatterns = [
 
     path('order_view',cto.order_view,name='order_view'),
     path('single_order_view',cto.single_order_view,name='single_order_view'),
+
+    #----------------------------------------------------------extra
+
+     path('recently_viewed_oc',ex.recently_viewed_oc,name='recently_viewed_oc'),
+
 
 
 

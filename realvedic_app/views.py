@@ -140,7 +140,8 @@ def write_data(request,format=None):
     for i in prod_obj:
         small_carousal_images={
             "image": i["image"],
-            "product_id": i["id"]
+            "product_id": i["id"],
+            "title":i['title']
         }
         small_carousal_images_list.append(small_carousal_images)
    
@@ -211,7 +212,18 @@ def write_data(request,format=None):
 @api_view(['POST'])
 def single_product_view(request,format=None):
     prod_id=request.data["prod_id"]
+    token=request.data['token']
+    try:
+        user = user_data.objects.get(token = token)
+        cart_product_ids = user_cart.objects.filter(user_id = user.id).values_list('product_id',flat=True)
+        usercart=user_cart.objects.filter(user_id=user.id).values()
+        prod=Product_data.objects.values()
+
+
+    except:
+        cart_product_ids = []
     obj=Product_data.objects.filter(id=prod_id).values()
+   
     #-------------------------------------------------------Dictionaries and list initialisation--------------------------------------------------
     #----------------------------------------------------------Mock description--------------------------------------------------------------------
     desc=str("A ready dosa mix without going through the hassle of soaking, grinding, and preparing the batter. Just add water and salt, rest for few minutes, and start making tasty and healthy dosas. We have combined 80 sprouted green gram with nutritious moringa leaves and spices for a power-packed quick meal any time of the day.")
@@ -241,7 +253,13 @@ def single_product_view(request,format=None):
             "offer_price":int(i["price"].split("|")[0])-5,
             'single_image':i["image"],
             'images':img.split(','),
-            'pack_size':pack_size}
+            'pack_size':pack_size,
+            'quantity':usercart.filter(product_id=i['id']).values_list('quantity')
+        }
+        if str(i['id']) in cart_product_ids:
+            prod_details['cart_status'] = True
+        else:
+            prod_details['cart_status'] = False
             
         benefits={
                 'title':"benefits",
@@ -295,7 +313,7 @@ def single_product_view(request,format=None):
         
     return Response(res)
 
-@api_view(['GET'])
+'''@api_view(['GET'])
 def all_product_view(request,format=None):
     products_list=[]
     obj=Product_data.objects.values()
@@ -308,10 +326,9 @@ def all_product_view(request,format=None):
             "weight":i["size"].split("|"),
             "price":i["price"].split("|")
         }
-    for j in prod['weight']:
-        print(j.split('g'))
+  
         products_list.append(prod)
-    return Response(products_list)
+    return Response(products_list)'''
 
 
 @api_view(['GET'])

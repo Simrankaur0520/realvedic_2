@@ -85,7 +85,7 @@ class user_cart(models.Model):
     product_id = models.TextField()
     size = models.TextField()
     price_per_unit=models.TextField(blank=True)
-    quantity = models.TextField(blank=True)
+    quantity = models.TextField(blank=False,default=0)
     image=models.TextField(blank=True,null=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -45,7 +45,7 @@ def add_to_cart(request,fromat=None):
         size = request.data['size']
         price=request.data['price']
         
-        #----------------Checking for Product id in produt data
+        #----------------Che iin produt data
 
         try:
             pro=Product_data.objects.get(id=product_id)
