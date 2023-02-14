@@ -45,7 +45,7 @@ def add_to_cart(request,fromat=None):
         size = request.data['size']
         price=request.data['price']
         
-        #----------------Che iin produt data
+        #----------------Checking produt data
 
         try:
             pro=Product_data.objects.get(id=product_id)
@@ -208,6 +208,7 @@ def checkout(request,format=None):
     try:
         user = user_data.objects.get(token = token)
         items = user_cart.objects.filter(user_id = user.id).values()
+        #products = Product_data.objects.filter(id=items.product_id).values()
         for i in items:
             products = Product_data.objects.filter(id=i['product_id']).values()
             for j in products:

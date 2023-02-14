@@ -212,12 +212,14 @@ def write_data(request,format=None):
 @api_view(['POST'])
 def single_product_view(request,format=None):
     prod_id=request.data["prod_id"]
-    token=request.data['token']
+    x = 0
     try:
+        token=request.data['token']
         user = user_data.objects.get(token = token)
         cart_product_ids = user_cart.objects.filter(user_id = user.id).values_list('product_id',flat=True)
         usercart=user_cart.objects.filter(user_id=user.id).values()
         prod=Product_data.objects.values()
+        x = 1
 
 
     except:
@@ -254,7 +256,7 @@ def single_product_view(request,format=None):
             'single_image':i["image"],
             'images':img.split(','),
             'pack_size':pack_size,
-            'quantity':usercart.filter(product_id=i['id']).values_list('quantity')
+            'quantity':usercart.filter(product_id=i['id']).values_list('quantity') if x == 1 else 0
         }
         if str(i['id']) in cart_product_ids:
             prod_details['cart_status'] = True
@@ -312,6 +314,12 @@ def single_product_view(request,format=None):
 
         
     return Response(res)
+
+@api_view(['GET'])
+def search_bar(request,format=None):
+    prod_obj=Product_data.objects.values('id','image','title')
+    return Response(prod_obj)
+
 
 '''@api_view(['GET'])
 def all_product_view(request,format=None):

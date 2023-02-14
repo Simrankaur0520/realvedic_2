@@ -24,7 +24,7 @@ from rest_framework.parsers import MultiPartParser,FormParser
 from rest_framework.response import Response
 
 #----------------------------models---------------------------------------------------
-from realvedic_app.models import user_data
+from realvedic_app.models import user_data,user_address
 
 #----------------------------extra---------------------------------------------------
 import simplejson as json
@@ -79,7 +79,8 @@ def signUp(request,format=None):
 @api_view(['GET'])
 def user_view(request,format=None):
     obj=user_data.objects.values()
-    return Response(obj)
+    user_address_val=user_address.objects.values()
+    return Response(user_address_val)
 
 @api_view(['POST'])
 def login(request,format=None):
@@ -107,4 +108,4 @@ def login(request,format=None):
                   }
         return Response(res)
 
-        
+        #nmgnfapdpdhotsyo

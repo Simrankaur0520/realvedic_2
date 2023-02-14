@@ -25,6 +25,7 @@ urlpatterns = [
     path("categoryPage",views.categoryPage,name="categoryPage"),
     #path("all_product_view",views.all_product_view,name="all_product_view"),
     path("NavbarCategoryView",views.NavbarCategoryView,name="NavbarCategoryView"),
+    path("search_bar",views.search_bar,name="search_bar"),
 
     #--------login and signup
     path('signUp',auth.signUp,name='signUp'),
@@ -68,7 +69,7 @@ urlpatterns = [
 
     #----------------------------------------------------------extra
 
-     path('recently_viewed_oc',ex.recently_viewed_oc,name='recently_viewed_oc'),
+    path('recently_viewed_oc',ex.recently_viewed_oc,name='recently_viewed_oc'),
 
 
 

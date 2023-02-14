@@ -33,10 +33,10 @@ import json
 
 @api_view(['POST'])
 def userAccountView(request,format=None):
+
     token=request.data['token']
-    user=user_data.objects.get(token=token)
-    user_address_val=user_address.objects.get(user_id=user.id)
     res={}
+    user=user_data.objects.get(token=token)
     res['first_name']=user.first_name
     res['last_name']=user.last_name
     res['email']=user.email
@@ -44,13 +44,29 @@ def userAccountView(request,format=None):
     res['phone_code']=user.phone_code
     res['phone_no']=user.phone_no
     res['dob']=user.dob 
-    res['add_line_1']=user_address_val.add_line_1 
-    res['add_line_2']=user_address_val.add_line_2
-    res['city']=user_address_val.city
-    res['landmark']=user_address_val.landmark
-    res['state']=user_address_val.state
-    res['country']=user_address_val.country
-    res['pincode']=user_address_val.pincode
+    try:
+      
+        user_address_val=user_address.objects.get(user_id=user.id)
+      
+        res['add_line_1']=user_address_val.add_line_1 
+        res['add_line_2']=user_address_val.add_line_2
+        res['city']=user_address_val.city
+        res['landmark']=user_address_val.landmark
+        res['state']=user_address_val.state
+        res['country']=user_address_val.country
+        res['pincode']=user_address_val.pincode
+    except:
+         
+        res['add_line_1']=''
+        res['add_line_2']=''
+        res['city']=''       
+        res['landmark']=''
+        res['state']=''
+        res['country']=''
+        res['pincode']=''
+        
+    
+    
 
     
     return Response(res)
@@ -61,7 +77,7 @@ def UserAccountEdit(request,format=None):
     
     token=request.data['token']
     res = json.loads(acc)
-    print(type(res))
+    
     first_name =res['first_name']
     last_name = res['last_name']
     gender = res['gender']
@@ -79,37 +95,68 @@ def UserAccountEdit(request,format=None):
     country = res['country']
     pincode = res['pincode']
     user=user_data.objects.get(token=token)
+    ua=user_address.objects.filter(user_id=user.id).values()
+    if len(ua)==0:
+        data=user_address(
+                user_id=user.id,
+                add_line_1=add_line_1,
+                add_line_2=add_line_2,
+                landmark=landmark,
+                city=city,
+                state=state,
+                country=country,
+                pincode=pincode)
+        data.save()
+        try:
+            user_data.objects.filter(token = token).update(
+                                                            first_name = first_name,
+                                                            last_name= last_name,
+                                                            email = email,
+                                                            gender = gender,
+                                                            dob = dob,
+                                                            phone_code = phone_code,
+                                                            phone_no = phone_no,
+                                                        )
+            resp = {
+                'status':True,
+                'message': 'Profile updated successfully'
+                }
+        except:
+            resp = {
+                    'status':user.id,
+                    'message':ua.user_id
+                }
 
+    else:
+            try:
+                user_data.objects.filter(token = token).update(
+                                                                first_name = first_name,
+                                                                last_name= last_name,
+                                                                email = email,
+                                                                gender = gender,
+                                                                dob = dob,
+                                                                phone_code = phone_code,
+                                                                phone_no = phone_no,
+                                                            )
+                user_address.objects.filter(user_id=user.id).update(
+                                                                    add_line_1=add_line_1,
+                                                                    add_line_2=add_line_2,
+                                                                    landmark=landmark,
+                                                                    city=city,
+                                                                    state=state,
+                                                                    country=country,
+                                                                    pincode=pincode
 
-    try:
-        user_data.objects.filter(token = token).update(
-                                                        first_name = first_name,
-                                                        last_name= last_name,
-                                                        email = email,
-                                                        gender = gender,
-                                                        dob = dob,
-                                                        phone_code = phone_code,
-                                                        phone_no = phone_no,
-                                                      )
-        user_address.objects.filter(user_id=user.id).update(
-                                                            add_line_1=add_line_1,
-                                                            add_line_2=add_line_2,
-                                                            landmark=landmark,
-                                                            city=city,
-                                                            state=state,
-                                                            country=country,
-                                                            pincode=pincode
-
-                                                            
-                                                                )
-        res = {
-               'status':True,
-               'message': 'Profile updated successfully'
-              }
-    except:
-        res = {
-                'status':False,
-                'message':'Something went wrong'
-              }
+                                                                    
+                                                                        )
+                resp = {
+                    'status':True,
+                    'message': 'Profile updated successfully'
+                    }
+            except:
+                resp = {
+                        'status':user.id,
+                        'message':ua.user_id
+                    }
    
-    return Response(res)
+    return Response(resp)

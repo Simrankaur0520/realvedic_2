@@ -1,4 +1,6 @@
 import json
+from django.http import HttpResponse
+from django.contrib.auth.hashers import make_password,check_password
 
 import environ
 import razorpay
@@ -197,20 +199,11 @@ def cart_to_order(token,items,ord_id,final_price):
 
     else:
         res={'something went wrong'}'''
- 
-'''@api_view(['GET'])
-def corder_view(request,format=None):
- 
-    ord=Order_data.objects.all()
-    ord.delete()
-    
 
+'''def corder_view(request,format=None):
+ 
 
-    
-  
-    
-    ordr=PaymentOrder.objects.values()
     
    
  
-    return Response(ord)'''
+    return HttpResponse(make_password('1234567890'))'''
